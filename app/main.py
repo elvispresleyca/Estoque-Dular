@@ -137,8 +137,7 @@ async def root(request: Request, user=Depends(auth.get_current_user)):
 async def login_page(request: Request, user=Depends(auth.get_current_user)):
     if user:
         return RedirectResponse(url="/dashboard", status_code=302)
-    return templates.TemplateResponse("login.html", {"request": request, "error": None})
-    
+    return templates.TemplateResponse("login.html", {"request": request, "error": None})    
 @app.post("/login")
 async def login(
     request: Request,
