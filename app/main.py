@@ -16,30 +16,8 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Sistema de Estoque - Depósitos e Lojas", version="2.0")
 
-from pathlib import Path
-
-_here = Path(__file__).resolve().parent
-_candidates = [
-    _here.parent / "templates",
-    _here / "templates",
-    Path.cwd() / "templates",
-    Path("/opt/render/project/src/templates"),
-]
-_templates_dir = None
-for c in _candidates:
-    if c.is_dir() and (c / "login.html").exists():
-        _templates_dir = c
-        break
-if _templates_dir is None:
-    raise RuntimeError(
-        f"Pasta templates nao encontrada. Busquei em: {[str(c) for c in _candidates]}. cwd={os.getcwd()} file={__file__}"
-    )
-print(f"TEMPLATES DIR = {_templates_dir}")
-templates = Jinja2Templates(directory=str(_templates_dir))
-
-_static_dir = _templates_dir.parent / "static"
-if _static_dir.is_dir():
-    app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")# ==================== INICIALIZAÇÃO ====================
+templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 def init_data(db: Session):
     if db.query(models.User).count() == 0:
         admin = models.User(
@@ -137,7 +115,7 @@ async def root(request: Request, user=Depends(auth.get_current_user)):
 async def login_page(request: Request, user=Depends(auth.get_current_user)):
     if user:
         return RedirectResponse(url="/dashboard", status_code=302)
-    return templates.TemplateResponse("login.html", {"request": request, "error": None})    
+        return templates.TemplateResponse("login.html", {"request": request, "error": None})    
 @app.post("/login")
 async def login(
     request: Request,
