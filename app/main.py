@@ -16,8 +16,8 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Sistema de Estoque - Depósitos e Lojas", version="2.0")
 
-templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="/opt/render/project/src/templates")
+app.mount("/static", StaticFiles(directory="/opt/render/project/src/static"), name="static")
 def init_data(db: Session):
     if db.query(models.User).count() == 0:
         admin = models.User(
