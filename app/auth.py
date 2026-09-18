@@ -7,12 +7,11 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from . import models, database
 
-# Configurações
 SECRET_KEY = "estoque-secreto-mude-isso-em-producao-2026-xyz789"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 12  # 12 horas
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 12
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 
@@ -51,14 +50,11 @@ def authenticate_user(db: Session, username: str, password: str):
 async def get_current_user(request: Request, db: Session = Depends(database.get_db)):
     token = request.cookies.get("access_token")
     if not token:
-        # tenta header também
         auth_header = request.headers.get("Authorization")
         if auth_header and auth_header.startswith("Bearer "):
             token = auth_header.split(" ")[1]
-    
     if not token:
         return None
-
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -66,7 +62,6 @@ async def get_current_user(request: Request, db: Session = Depends(database.get_
             return None
     except JWTError:
         return None
-
     user = get_user_by_username(db, username)
     return user
 
