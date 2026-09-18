@@ -116,7 +116,9 @@ async def login_page(request: Request, user=Depends(auth.get_current_user)):
     if user:
         return RedirectResponse(url="/dashboard", status_code=302)
     return templates.TemplateResponse("login.html", {"request": request, "error": None})
-    @app.post("/login")
+
+
+@app.post("/login")
 async def login(
     request: Request,
     username: str = Form(...),
@@ -134,7 +136,6 @@ async def login(
     resp = RedirectResponse(url="/dashboard", status_code=302)
     resp.set_cookie(key="access_token", value=access_token, httponly=True, max_age=60*60*12, samesite="lax")
     return resp
-
 
 @app.get("/logout")
 async def logout():
