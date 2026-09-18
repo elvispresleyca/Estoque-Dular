@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Relatórios - Estoque{% endblock %}
+{% block page_title %}Relatórios{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white rounded-xl shadow">
+        <div class="px-5 py-4 border-b">
+            <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-trophy text-yellow-500"></i> Top 20 Mais Vendidos (30 dias)
+            </h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="px-4 py-3 text-left">#</th>
+                        <th class="px-4 py-3 text-left">Produto</th>
+                        <th class="px-4 py-3 text-right">Qtd vendida</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y">
+                    {% for product, total in top_sellers %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-bold text-gray-400">{{ loop.index }}</td>
+                        <td class="px-4 py-3">
+                            <p class="font-medium">{{ product.name }}</p>
+                            <p class="text-xs text-gray-500">{{ product.sku }}</p>
+                        </td>
+                        <td class="px-4 py-3 text-right font-semibold text-green-600">{{ total }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3" class="px-4 py-8 text-center text-gray-500">Sem vendas no período</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow">
+        <div class="px-5 py-4 border-b">
+            <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-map-marker-alt text-blue-500"></i> Estoque por Local
+            </h3>
+        </div>
+        <div class="p-5 space-y-6 max-h-[600px] overflow-y-auto">
+            {% for loc in locations %}
+            <div>
+                <h4 class="font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    {% if loc.type.value == 'deposito' %}
+                    <i class="fas fa-warehouse text-indigo-500"></i>
+                    {% else %}
+                    <i class="fas fa-store text-purple-500"></i>
+                    {% endif %}
+                    {{ loc.name }}
+                </h4>
+                {% if stock_by_loc[loc.id] %}
+                <div class="space-y-1">
+                    {% for stock, product in stock_by_loc[loc.id] %}
+                    <div class="flex justify-between text-sm py-1 border-b border-gray-100">
+                        <span>{{ product.name }} <span class="text-xs text-gray-400">({{ product.sku }})</span></span>
+                        <span class="font-medium">{{ stock.quantity }} {{ product.unit }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-sm text-gray-400">Nenhum item em estoque</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

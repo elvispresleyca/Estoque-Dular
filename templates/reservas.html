@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Reservas - Estoque{% endblock %}
+{% block page_title %}Reservas{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <p class="text-gray-600">Itens reservados para clientes</p>
+    <a href="/reservas/nova" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+        <i class="fas fa-plus"></i> Nova Reserva
+    </a>
+</div>
+
+<div class="bg-white rounded-xl shadow overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-gray-600">
+                <tr>
+                    <th class="px-4 py-3 text-left">Data</th>
+                    <th class="px-4 py-3 text-left">Cliente</th>
+                    <th class="px-4 py-3 text-left">Produto</th>
+                    <th class="px-4 py-3 text-left">Local</th>
+                    <th class="px-4 py-3 text-right">Qtd</th>
+                    <th class="px-4 py-3 text-left">Vendedora</th>
+                    <th class="px-4 py-3 text-left">Status</th>
+                    <th class="px-4 py-3 text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y">
+                {% for r in reservations %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{ r.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td class="px-4 py-3">
+                        <p class="font-medium">{{ r.customer_name }}</p>
+                        {% if r.customer_phone %}<p class="text-xs text-gray-500">{{ r.customer_phone }}</p>{% endif %}
+                    </td>
+                    <td class="px-4 py-3">
+                        <p class="font-medium">{{ r.product.name }}</p>
+                        <p class="text-xs text-gray-500">{{ r.product.sku }}</p>
+                    </td>
+                    <td class="px-4 py-3">{{ r.location.name }}</td>
+                    <td class="px-4 py-3 text-right font-semibold">{{ r.quantity }}</td>
+                    <td class="px-4 py-3">{{ r.salesperson.full_name }}</td>
+                    <td class="px-4 py-3">
+                        {% if r.status.value == 'ativa' %}
+                        <span class="px-2.5 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Ativa</span>
+                        {% elif r.status.value == 'confirmada' %}
+                        <span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Confirmada</span>
+                        {% else %}
+                        <span class="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">Cancelada</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        {% if r.status.value == 'ativa' %}
+                        <div class="flex justify-center gap-2">
+                            <form method="post" action="/reservas/{{ r.id }}/confirmar" class="inline">
+                                <button type="submit" class="text-green-600 hover:text-green-800" title="Confirmar venda"><i class="fas fa-check-circle"></i></button>
+                            </form>
+                            <form method="post" action="/reservas/{{ r.id }}/cancelar" class="inline">
+                                <button type="submit" class="text-red-600 hover:text-red-800" title="Cancelar"><i class="fas fa-times-circle"></i></button>
+                            </form>
+                        </div>
+                        {% else %}<span class="text-gray-400">—</span>{% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="px-4 py-10 text-center text-gray-500">
+                        Nenhuma reserva.
+                        <a href="/reservas/nova" class="text-blue-600 hover:underline">Criar a primeira</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

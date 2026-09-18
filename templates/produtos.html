@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Produtos - Estoque{% endblock %}
+{% block page_title %}Produtos{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <p class="text-gray-600">{{ products|length }} produto(s) cadastrado(s)</p>
+    {% if user.role.value == 'admin' %}
+    <a href="/produtos/novo" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+        <i class="fas fa-plus"></i> Novo Produto
+    </a>
+    {% endif %}
+</div>
+
+<div class="bg-white rounded-xl shadow overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-gray-600">
+                <tr>
+                    <th class="px-4 py-3 text-left sticky left-0 bg-gray-50">SKU</th>
+                    <th class="px-4 py-3 text-left sticky left-16 bg-gray-50">Produto</th>
+                    {% for loc in locations %}
+                    <th class="px-3 py-3 text-center text-xs {% if loc.type.value == 'loja' %}bg-purple-50{% else %}bg-indigo-50{% endif %}" title="{{ loc.name }}">
+                        {{ loc.name.replace('Depósito ', '').replace('Loja ', '').replace(' - Mostruário', '')[:12] }}
+                    </th>
+                    {% endfor %}
+                    <th class="px-4 py-3 text-center">Total</th>
+                    <th class="px-4 py-3 text-center">Mín.</th>
+                    {% if user.role.value == 'admin' %}
+                    <th class="px-4 py-3 text-center">Ações</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody class="divide-y">
+                {% for p in products %}
+                <tr class="hover:bg-gray-50 {% if stocks_map[p.id].total <= p.min_stock %}bg-red-50{% endif %}">
+                    <td class="px-4 py-3 font-mono text-xs">{{ p.sku }}</td>
+                    <td class="px-4 py-3">
+                        <p class="font-medium">{{ p.name }}</p>
+                        <p class="text-xs text-gray-500">{{ p.category or '' }}</p>
+                    </td>
+                    {% for loc in locations %}
+                    <td class="px-3 py-3 text-center">{{ stocks_map[p.id].get(loc.id, 0) }}</td>
+                    {% endfor %}
+                    <td class="px-4 py-3 text-center font-semibold {% if stocks_map[p.id].total <= p.min_stock %}text-red-600{% endif %}">
+                        {{ stocks_map[p.id].total }}
+                    </td>
+                    <td class="px-4 py-3 text-center text-gray-500">{{ p.min_stock }}</td>
+                    {% if user.role.value == 'admin' %}
+                    <td class="px-4 py-3 text-center">
+                        <a href="/produtos/{{ p.id }}/editar" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="20" class="px-4 py-10 text-center text-gray-500">
+                        Nenhum produto cadastrado.
+                        {% if user.role.value == 'admin' %}<a href="/produtos/novo" class="text-blue-600 hover:underline">Cadastre o primeiro</a>{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<p class="mt-3 text-xs text-gray-500">
+    <span class="inline-block w-3 h-3 bg-indigo-100 rounded mr-1"></span> Depósito &nbsp;
+    <span class="inline-block w-3 h-3 bg-purple-100 rounded mr-1"></span> Loja / Mostruário
+</p>
+{% endblock %}

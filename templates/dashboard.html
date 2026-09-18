@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Estoque{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
+    <div class="bg-white rounded-xl shadow p-5 border-l-4 border-blue-500">
+        <p class="text-sm text-gray-500">Produtos</p>
+        <p class="text-3xl font-bold text-gray-800 mt-1">{{ total_products }}</p>
+    </div>
+    <div class="bg-white rounded-xl shadow p-5 border-l-4 border-indigo-500">
+        <p class="text-sm text-gray-500">Depósitos</p>
+        <p class="text-3xl font-bold text-gray-800 mt-1">{{ total_depositos }}</p>
+    </div>
+    <div class="bg-white rounded-xl shadow p-5 border-l-4 border-purple-500">
+        <p class="text-sm text-gray-500">Lojas / Mostruários</p>
+        <p class="text-3xl font-bold text-gray-800 mt-1">{{ total_lojas }}</p>
+    </div>
+    <div class="bg-white rounded-xl shadow p-5 border-l-4 border-yellow-500">
+        <p class="text-sm text-gray-500">Reservas ativas</p>
+        <p class="text-3xl font-bold text-gray-800 mt-1">{{ total_reservations }}</p>
+    </div>
+    <div class="bg-white rounded-xl shadow p-5 border-l-4 border-red-500">
+        <p class="text-sm text-gray-500">Estoque baixo</p>
+        <p class="text-3xl font-bold text-gray-800 mt-1">{{ low_stock|length }}</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white rounded-xl shadow">
+        <div class="px-5 py-4 border-b flex justify-between items-center">
+            <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-exclamation-triangle text-red-500"></i> Alerta de Estoque Baixo
+            </h3>
+            <a href="/produtos" class="text-sm text-blue-600 hover:underline">Ver todos</a>
+        </div>
+        <div class="p-5">
+            {% if low_stock %}
+            <div class="space-y-3">
+                {% for item in low_stock %}
+                <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg badge-low">
+                    <div>
+                        <p class="font-medium text-gray-800">{{ item.product.name }}</p>
+                        <p class="text-xs text-gray-500">SKU: {{ item.product.sku }} · Mínimo: {{ item.product.min_stock }}</p>
+                    </div>
+                    <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold">
+                        {{ item.total }} {{ item.product.unit }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-6">Nenhum produto com estoque baixo 🎉</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow">
+        <div class="px-5 py-4 border-b flex justify-between items-center">
+            <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-trophy text-yellow-500"></i> Mais Vendidos (30 dias)
+            </h3>
+            <a href="/relatorios" class="text-sm text-blue-600 hover:underline">Ver relatório</a>
+        </div>
+        <div class="p-5">
+            {% if top_sellers %}
+            <div class="space-y-3">
+                {% for product, total in top_sellers %}
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <span class="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold">{{ loop.index }}</span>
+                        <div>
+                            <p class="font-medium text-gray-800">{{ product.name }}</p>
+                            <p class="text-xs text-gray-500">{{ product.sku }}</p>
+                        </div>
+                    </div>
+                    <span class="font-semibold text-green-600">{{ total }} un</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-6">Ainda não há saídas registradas</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow">
+        <div class="px-5 py-4 border-b flex justify-between items-center">
+            <h3 class="font-semibold text-gray-800">Últimas Movimentações</h3>
+            <a href="/movimentacoes" class="text-sm text-blue-600 hover:underline">Ver todas</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="px-4 py-3 text-left">Data</th>
+                        <th class="px-4 py-3 text-left">Produto</th>
+                        <th class="px-4 py-3 text-left">Tipo</th>
+                        <th class="px-4 py-3 text-right">Qtd</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y">
+                    {% for m in recent_movements %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-gray-500">{{ m.created_at.strftime('%d/%m %H:%M') }}</td>
+                        <td class="px-4 py-3">{{ m.product.name[:25] }}{% if m.product.name|length > 25 %}...{% endif %}</td>
+                        <td class="px-4 py-3">
+                            {% if m.type.value == 'entrada' %}
+                            <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs">Entrada</span>
+                            {% elif m.type.value == 'saida' %}
+                            <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs">Saída</span>
+                            {% else %}
+                            <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">Transferência</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-right font-medium">{{ m.quantity }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="px-4 py-6 text-center text-gray-500">Nenhuma movimentação ainda</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow">
+        <div class="px-5 py-4 border-b flex justify-between items-center">
+            <h3 class="font-semibold text-gray-800">Reservas Ativas</h3>
+            <a href="/reservas" class="text-sm text-blue-600 hover:underline">Ver todas</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="px-4 py-3 text-left">Cliente</th>
+                        <th class="px-4 py-3 text-left">Produto</th>
+                        <th class="px-4 py-3 text-right">Qtd</th>
+                        <th class="px-4 py-3 text-left">Vendedora</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y">
+                    {% for r in active_reservations %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3">{{ r.customer_name }}</td>
+                        <td class="px-4 py-3">{{ r.product.name[:20] }}{% if r.product.name|length > 20 %}...{% endif %}</td>
+                        <td class="px-4 py-3 text-right font-medium">{{ r.quantity }}</td>
+                        <td class="px-4 py-3 text-gray-500">{{ r.salesperson.full_name.split()[0] }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="px-4 py-6 text-center text-gray-500">Nenhuma reserva ativa</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Transferências - Estoque{% endblock %}
+{% block page_title %}Transferências entre Depósitos e Lojas{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <p class="text-gray-600">Movimente estoque entre qualquer depósito ou loja</p>
+    <a href="/transferencias/nova" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+        <i class="fas fa-truck"></i> Nova Transferência
+    </a>
+</div>
+
+<div class="bg-white rounded-xl shadow overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-gray-600">
+                <tr>
+                    <th class="px-4 py-3 text-left">Data/Hora</th>
+                    <th class="px-4 py-3 text-left">Produto</th>
+                    <th class="px-4 py-3 text-left">Origem</th>
+                    <th class="px-4 py-3 text-left">Destino</th>
+                    <th class="px-4 py-3 text-right">Qtd</th>
+                    <th class="px-4 py-3 text-left">Usuário</th>
+                    <th class="px-4 py-3 text-left">Obs.</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y">
+                {% for t in transfers %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{ t.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td class="px-4 py-3">
+                        <p class="font-medium">{{ t.product.name }}</p>
+                        <p class="text-xs text-gray-500">{{ t.product.sku }}</p>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="text-sm">{{ t.location.name }}</span>
+                        <span class="text-xs text-gray-400 block">
+                            {% if t.location.type.value == 'deposito' %}Depósito{% else %}Loja{% endif %}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">
+                        {% if t.destination %}
+                        <span class="text-sm">{{ t.destination.name }}</span>
+                        <span class="text-xs text-gray-400 block">
+                            {% if t.destination.type.value == 'deposito' %}Depósito{% else %}Loja{% endif %}
+                        </span>
+                        {% else %}-{% endif %}
+                    </td>
+                    <td class="px-4 py-3 text-right font-semibold">{{ t.quantity }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ t.user.full_name }}</td>
+                    <td class="px-4 py-3 text-gray-500 text-xs max-w-xs truncate">{{ t.notes or '-' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="px-4 py-10 text-center text-gray-500">
+                        Nenhuma transferência registrada.
+                        <a href="/transferencias/nova" class="text-blue-600 hover:underline">Fazer a primeira</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

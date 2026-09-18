@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{% if product %}Editar{% else %}Novo{% endif %} Produto - Estoque{% endblock %}
+{% block page_title %}{% if product %}Editar Produto{% else %}Novo Produto{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+    {% if error %}
+    <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+        <i class="fas fa-exclamation-circle mr-2"></i>{{ error }}
+    </div>
+    {% endif %}
+
+    <form method="post" class="bg-white rounded-xl shadow p-6 space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">SKU *</label>
+                <input type="text" name="sku" required value="{{ product.sku if product else '' }}"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="Ex: PROD-001">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+                <input type="text" name="name" required value="{{ product.name if product else '' }}"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="Nome do produto">
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+            <textarea name="description" rows="2"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="Descrição opcional">{{ product.description if product and product.description else '' }}</textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                <input type="text" name="category" value="{{ product.category if product and product.category else '' }}"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="Ex: Eletrônicos">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Unidade</label>
+                <select name="unit" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="un" {% if product and product.unit == 'un' %}selected{% endif %}>Unidade (un)</option>
+                    <option value="kg" {% if product and product.unit == 'kg' %}selected{% endif %}>Quilo (kg)</option>
+                    <option value="cx" {% if product and product.unit == 'cx' %}selected{% endif %}>Caixa (cx)</option>
+                    <option value="pc" {% if product and product.unit == 'pc' %}selected{% endif %}>Peça (pc)</option>
+                    <option value="lt" {% if product and product.unit == 'lt' %}selected{% endif %}>Litro (lt)</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Estoque mínimo (alerta)</label>
+                <input type="number" name="min_stock" min="0" value="{{ product.min_stock if product else 5 }}"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Preço de custo (R$)</label>
+                <input type="number" name="cost_price" step="0.01" min="0" value="{{ product.cost_price if product else 0 }}"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Preço de venda (R$)</label>
+                <input type="number" name="sale_price" step="0.01" min="0" value="{{ product.sale_price if product else 0 }}"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+        </div>
+
+        <div class="flex gap-3 pt-2">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium">
+                {% if product %}Salvar alterações{% else %}Cadastrar produto{% endif %}
+            </button>
+            <a href="/produtos" class="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Depósitos & Lojas - Estoque{% endblock %}
+{% block page_title %}Depósitos & Lojas (Mostruários){% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <p class="text-gray-600">Gerencie depósitos e lojas. Transferências podem ser feitas entre qualquer local.</p>
+    {% if user.role.value == 'admin' %}
+    <a href="/locais/novo" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+        <i class="fas fa-plus"></i> Novo Depósito / Loja
+    </a>
+    {% endif %}
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Depósitos -->
+    <div class="bg-white rounded-xl shadow overflow-hidden">
+        <div class="px-5 py-4 border-b bg-indigo-50 flex items-center gap-2">
+            <i class="fas fa-warehouse text-indigo-600"></i>
+            <h3 class="font-semibold text-gray-800">Depósitos ({{ depositos|length }})</h3>
+        </div>
+        <div class="divide-y">
+            {% for loc in depositos %}
+            <div class="px-5 py-4 flex justify-between items-center hover:bg-gray-50">
+                <div>
+                    <p class="font-medium text-gray-800">{{ loc.name }}</p>
+                    <p class="text-xs text-gray-500">{{ loc.address or 'Sem endereço' }}</p>
+                    {% if not loc.is_active %}<span class="text-xs text-red-500">Inativo</span>{% endif %}
+                </div>
+                {% if user.role.value == 'admin' %}
+                <a href="/locais/{{ loc.id }}/editar" class="text-blue-600 hover:text-blue-800 text-sm">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                {% endif %}
+            </div>
+            {% else %}
+            <p class="px-5 py-8 text-center text-gray-500">Nenhum depósito cadastrado</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Lojas / Mostruários -->
+    <div class="bg-white rounded-xl shadow overflow-hidden">
+        <div class="px-5 py-4 border-b bg-purple-50 flex items-center gap-2">
+            <i class="fas fa-store text-purple-600"></i>
+            <h3 class="font-semibold text-gray-800">Lojas / Mostruários ({{ lojas|length }})</h3>
+        </div>
+        <div class="divide-y">
+            {% for loc in lojas %}
+            <div class="px-5 py-4 flex justify-between items-center hover:bg-gray-50">
+                <div>
+                    <p class="font-medium text-gray-800">{{ loc.name }}</p>
+                    <p class="text-xs text-gray-500">{{ loc.address or 'Sem endereço' }}</p>
+                    {% if not loc.is_active %}<span class="text-xs text-red-500">Inativo</span>{% endif %}
+                </div>
+                {% if user.role.value == 'admin' %}
+                <a href="/locais/{{ loc.id }}/editar" class="text-blue-600 hover:text-blue-800 text-sm">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                {% endif %}
+            </div>
+            {% else %}
+            <p class="px-5 py-8 text-center text-gray-500">Nenhuma loja cadastrada</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
