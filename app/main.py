@@ -16,20 +16,30 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Sistema de Estoque - Depósitos e Lojas", version="2.0")
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# Fallbacks para o Render encontrar a pasta templates
-_candidates = [
-    os.path.join(BASE_DIR, "templates"),
-    os.path.join(os.getcwd(), "templates"),
-    "/opt/render/project/src/templates",
-]
-_templates_dir = next((p for p in _candidates if os.path.isdir(p)), _candidates[0])
-templates = Jinja2Templates(directory=_templates_dir)
+from pathlib import Path
 
-_static_dir = os.path.join(os.path.dirname(_templates_dir), "static")
-if os.path.isdir(_static_dir):
-    app.mount("/static", StaticFiles(directory=_static_dir), name="static")
-# ==================== INICIALIZAÇÃO ====================
+_here = Path(__file__).resolve().parent
+_candidates = [
+    _here.parent / "templates",
+    _here / "templates",
+    Path.cwd() / "templates",
+    Path("/opt/render/project/src/templates"),
+]
+_templates_dir = None
+for c in _candidates:
+    if c.is_dir() and (c / "login.html").exists():
+        _templates_dir = c
+        break
+if _templates_dir is None:
+    raise RuntimeError(
+        f"Pasta templates nao encontrada. Busquei em: {[str(c) for c in _candidates]}. cwd={os.getcwd()} file={__file__}"
+    )
+print(f"TEMPLATES DIR = {_templates_dir}")
+templates = Jinja2Templates(directory=str(_templates_dir))
+
+_static_dir = _templates_dir.parent / "static"
+if _static_dir.is_dir():
+    app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")# ==================== INICIALIZAÇÃO ====================
 def init_data(db: Session):
     if db.query(models.User).count() == 0:
         admin = models.User(
